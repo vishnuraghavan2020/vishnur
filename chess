@@ -9,10 +9,7 @@ class WhitePiece(object):
         self.typ = typ
         self.possibleMoveLst = possibleMoveLst
         
-
-
-
-
+        
     def attack(self, data, newRow, newCol):
 
         self.row = newRow
@@ -22,7 +19,6 @@ class WhitePiece(object):
         self.cy = data.margin + data.cellWidth//2 + data.cellWidth*self.row
 
 
- 
 
 class WhitePawn(WhitePiece):
     
@@ -49,8 +45,6 @@ class WhitePawn(WhitePiece):
                 self.possibleMoveLst.append((newRow,newCol))
          
 
-
-
     def allowMove(self, data, newRow, newCol):
 
         if data.inWhiteCheck == False:
@@ -71,8 +65,7 @@ class WhitePawn(WhitePiece):
 
                 return False
 
-        
-       
+
     def move(self, data, newRow, newCol):
 
 
@@ -96,7 +89,6 @@ class WhitePawn(WhitePiece):
 
                     self.cx = data.margin + data.cellWidth//2 + data.cellWidth*self.col
                     self.cy = data.margin + data.cellWidth//2 + data.cellWidth*self.row
-
 
 
 
@@ -125,7 +117,6 @@ class WhitePawn(WhitePiece):
             return False
 
         
-
     def draw(self, canvas):
 
     
@@ -179,8 +170,6 @@ class WhiteKing(WhitePiece):
 
 
     
-
-
     def allowMove(self, data, newRow, newCol):
 
     
@@ -198,7 +187,6 @@ class WhiteKing(WhitePiece):
 
             self.direc[0] = (newRow - self.row)// abs(newRow - self.row)
             self.direc[1] = 0
-
 
 
 
@@ -223,9 +211,6 @@ class WhiteKing(WhitePiece):
                             return True
 
 
-
-
-
             if abs(newRow - self.row) <= 1 and abs(newCol - self.col) <= 1:
 
 
@@ -240,7 +225,6 @@ class WhiteKing(WhitePiece):
 
                     else:
                         return True
-
 
         elif self.canCastle == False:
 
@@ -258,8 +242,6 @@ class WhiteKing(WhitePiece):
 
                         else:
                             return True
-
-
 
 
 
@@ -318,8 +300,6 @@ class WhiteKing(WhitePiece):
 
                     self.cx = data.margin + data.cellWidth//2 + data.cellWidth*self.col
                     self.cy = data.margin + data.cellWidth//2 + data.cellWidth*self.row
-
-
 
 
 
@@ -729,9 +709,7 @@ class WhiteBishop(WhitePiece):
 
         
 
-        
-
-
+      
     def allowMove(self, data, newRow, newCol):
 
         if data.inWhiteCheck == False:
