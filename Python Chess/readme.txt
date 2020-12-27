@@ -1,3 +1,5 @@
+Final Project in CMU's 15-112: The Fundamentals of Programming and Computer Science
+
 Contents of "Python Chess" Folder:
 	-Readme file
 	-Design and documentation
