@@ -1,0 +1,1185 @@
+from tkinter import *
+import random 
+
+def init(data):
+
+    data.menu = True
+
+    data.startGame = False
+    data.help = False
+
+    data.helpBackBt = False
+
+    data.gameEnd = False
+
+    data.newRound = False
+    data.hidden = False
+
+    data.playerAWin = False
+    data.playerBWin = False
+
+    data.handCount = 5
+
+
+    data.makeHandA = False
+    data.makeHandB = False
+
+    data.roundCounter = 0
+
+    data.fullFlop = []
+
+    data.scoreA = 0
+    data.scoreB = 0
+
+    data.betAmnt = 0
+
+    data.chips1A = 50
+    data.chips1B = 50
+
+    data.chips2A = 0
+    data.chips2B = 0
+
+    data.prevBetAmntA = 0
+    data.prevBetAmntB = 0
+
+    data.showTurn = False
+    data.showRiver = False
+
+    
+    data.player1Bt = False
+    data.player2Bt = False
+
+    data.fold = False
+
+    data.currPlayer1 = False
+    data.currPlayer2 = False
+
+    data.roundEnd = False
+
+    data.margin = 20
+    loadPlayingCardImages(data) # always load images in init! Function taken from loading images examples on 112 website; URL: https://www.cs.cmu.edu/~112/notes/notes-animations-demos.html#imagesDemo
+    data.cards = 13 #loading images demo (112 website)
+
+    data.suitNames = ["Clubs", "Diamonds", "Hearts", "Spades"] #loading images demo (112 website)
+
+    data.rankFlop1 = random.randint(1,data.cards)
+    data.rankFlop2 = random.randint(1,data.cards)
+    data.rankFlop3 = random.randint(1,data.cards)
+
+    data.suitNamesFlop1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesFlop2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesFlop3 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+    data.rankHole1 = random.randint(1,data.cards)
+    data.rankHole2 = random.randint(1,data.cards)
+
+    data.suitNamesHole1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesHole2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+    data.rankHoleA1 = random.randint(1,data.cards)
+    data.rankHoleA2 = random.randint(1,data.cards)
+
+    data.suitHoleA1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitHoleA2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+    data.rankHoleB1 = random.randint(1,data.cards)
+    data.rankHoleB2 = random.randint(1,data.cards)
+
+    data.suitHoleB1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitHoleB2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+    
+    data.rankTurn = random.randint(1,data.cards)
+    data.rankRiver = random.randint(1,data.cards)
+
+    data.suitNamesTurn = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesRiver = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+    data.handA = [(data.rankTurn, data.suitNamesTurn),   
+                           (data.rankRiver, data.suitNamesRiver),(data.rankHoleA1, data.suitHoleA1), (data.rankHoleA2, data.suitHoleA2), 
+                           (data.rankFlop1, data.suitNamesFlop1),
+                           (data.rankFlop2, data.suitNamesFlop2),
+                           (data.rankFlop3, data.suitNamesFlop3)]
+    data.handB = [(data.rankTurn, data.suitNamesTurn),   
+                           (data.rankRiver, data.suitNamesRiver),(data.rankHoleB1, data.suitHoleB1), (data.rankHoleB2, data.suitHoleB2), 
+                           (data.rankFlop1, data.suitNamesFlop1),
+                           (data.rankFlop2, data.suitNamesFlop2),
+                           (data.rankFlop3, data.suitNamesFlop3)]
+
+
+    
+
+
+def loadPlayingCardImages(data): #from 112 course website (loading images example) URL: https://www.cs.cmu.edu/~112/notes/notes-animations-demos.html#imagesDemo
+    cards = 55
+    data.cardImages = [ ]
+    for card in range(cards):
+        rank = (card%13)+1
+        suit = "cdhsx"[card//13]
+        filename = "playing-card-gifs/%s%d.gif" % (suit, rank)
+        data.cardImages.append(PhotoImage(file=filename))
+
+
+def getPlayingCardImage(data, rank, suitName): #from 112 course website (loading images example) URL: https://www.cs.cmu.edu/~112/notes/notes-animations-demos.html#imagesDemo
+    suitName = suitName[0].lower() # only care about first letter
+    suitNames = "cdhsx"
+    assert(1 <= rank <= 13)
+    assert(suitName in suitNames)
+    suit = suitNames.index(suitName)
+    return data.cardImages[13*suit + rank - 1]
+
+
+def randomFlopCards(data):
+
+    data.rankFlop1 = random.randint(1,data.cards)
+    data.rankFlop2 = random.randint(1,data.cards)
+    data.rankFlop3 = random.randint(1,data.cards)
+
+    data.suitNamesFlop1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesFlop2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesFlop3 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+
+
+def findHandPerms(hand): #permutation powerset code taken from 112 course website; URL: https://www.cs.cmu.edu/~112/notes/notes-recursion.html#permutations
+
+    if len(hand) == 0:
+        return [[]]
+
+    else:
+
+        partialSub = findHandPerms(hand[1:])
+        allSub = []
+        newLst = []
+
+        for subset in partialSub:
+            allSub.append(subset)
+            allSub.append([hand[0]] + subset)
+
+        return allSub
+
+
+
+def bestInitHand(data, hand):
+
+    newLst = []
+    
+    initialLst = findHandPerms(hand)
+
+    for resultLst in initialLst:
+        if len(resultLst) == 5:
+            if hand == data.handA:
+                if (data.rankHoleA1, data.suitHoleA1) in resultLst and (data.rankHoleA2, data.suitHoleA2) in resultLst:
+                    newLst.append(resultLst)
+
+            if hand == data.handB:
+                if (data.rankHoleB1, data.suitHoleB1) in resultLst and (data.rankHoleB2, data.suitHoleB2) in resultLst:
+                    newLst.append(resultLst)
+
+
+    sumLst1 = []
+    sumLst2 = []
+
+    for hand in newLst:
+        for card in hand:
+  
+            sumLst1.append(card[0])
+
+            
+        sumLst2.append((sum(sumLst1), hand))
+  
+ 
+    bestSum = 0
+    bestHand = None
+    for tp in sumLst2:
+        if tp[0] > bestSum:
+            bestSum = tp[0]
+            bestHand = tp[1]
+
+    return bestHand
+
+
+
+def sumHand(data, hand):
+
+    newLst = []
+    initLst = bestInitHand(data, hand)
+
+    for card in initLst:
+        newLst.append(card[0])
+
+
+    return sum(newLst)
+
+
+
+def handFlush(data, hand):
+
+    suitLst = []
+    currHandLst = bestInitHand(data, hand)
+    count = 0
+
+    for card in currHandLst:
+        suitLst.append(card[1])
+        
+
+    if len(set(suitLst)) == 1:
+        return True
+    return False
+
+
+
+
+
+
+def mousePressed(event, data):
+
+
+    if data.roundCounter == 1:
+
+        data.showTurn = True
+        data.fullFlop.append((data.rankTurn, data.suitNamesTurn))
+
+
+        if data.chips1A == 0 or data.chips1B == 0:
+            data.gameEnd = True
+            if data.chips2A > data.chips2B:
+                data.playerAWin = True
+
+            if data.chips2B > data.chips2A:
+                data.playerBWin = True
+
+        
+    if data.roundCounter == 2:
+        data.showRiver = True
+
+        data.currPlayer1 = False
+        data.currPlayer2 = False
+
+
+        data.fullFlop.append((data.rankRiver, data.suitNamesRiver))
+
+
+        if data.chips1A == 0 or data.chips1B == 0:
+            data.gameEnd = True
+            if data.chips2A > data.chips2B:
+                data.playerAWin = True
+
+            if data.chips2B > data.chips2A:
+                data.playerBWin = True
+
+        
+
+        resultA = sumHand(data, data.handA)
+        resultB = sumHand(data, data.handB)
+
+
+
+        if (handFlush(data, data.handA) == True or (resultA > resultB)) and data.makeHandB == True:
+
+
+            data.chips2A += data.chips2B
+            data.chips2B = 0
+
+            data.roundEnd = True
+
+
+            data.roundCounter = 0
+            data.prevBetAmntA = 0
+            data.prevBetAmntB = 0
+
+ 
+
+        elif (handFlush(data, data.handB) == True or (resultB > resultA)) and data.makeHandB == True:
+
+            data.chips2B += data.chips2A
+            data.chips2A = 0
+
+            data.roundEnd = True
+
+            data.roundCounter = 0
+            data.prevBetAmntA = 0
+            data.prevBetAmntB = 0
+            
+        
+
+        elif handFlush(data, data.handA) == True and (resultA == resultB) and data.makeHandB == True:
+
+
+            data.chips2A += data.chips2B
+            data.chips2B = 0
+
+         
+            data.roundCounter = 0
+            data.prevBetAmntA = 0
+            data.prevBetAmntB = 0
+
+            data.roundEnd = True
+    
+
+        elif handFlush(data, data.handB) == True and (resultA == resultB) and data.makeHandB == True:
+
+            data.chips2B += data.chips2A
+            data.chips2A = 0
+      
+            data.roundCounter = 0
+            data.prevBetAmntA = 0
+            data.prevBetAmntB = 0
+
+            data.roundEnd = True
+  
+
+        elif resultA == resultB and data.makeHandB == True:
+              
+            data.roundCounter = 0
+            data.prevBetAmntA = 0
+            data.prevBetAmntB = 0
+
+            data.roundEnd = True
+              
+
+
+
+    #start game
+    if event.x in range(data.width//3, 2*data.width//3 + 1) and event.y in range(data.height//3 + 2*data.margin, 5*data.height//12 + 2*data.margin + 1):
+        data.startGame = True
+
+        data.menu = False
+
+
+    #help screen
+    if event.x in range(data.width//3, 2*data.width//3 + 1) and event.y in range(data.margin + 5*data.height//12 + 2*data.margin, data.margin + data.height//2 + 2*data.margin + 1):
+        data.help = True
+
+
+    if event.x in range(2*data.margin, 3*data.margin + 1) and event.y in range(2*data.margin, 4*data.margin + 1) and data.help == True:
+        data.help = False
+        data.menu = True
+
+
+    
+
+    #new round: three new flop cards, two new hole cards for each player
+    if event.x in range(2*data.margin, 7*data.margin+1) and event.y in range(3*data.margin, 4*data.margin + 1):
+
+        data.startGame = True
+        
+        data.newRound = True
+        data.roundEnd = False
+
+        data.showTurn = False
+        data.showRiver = False
+
+        randomFlopCards(data)
+     
+
+        data.fullFlop.append((data.rankFlop1, data.suitNamesFlop1))
+        data.fullFlop.append((data.rankFlop2, data.suitNamesFlop2))
+        data.fullFlop.append((data.rankFlop3, data.suitNamesFlop3))
+
+   
+
+        data.rankHoleA1 = random.randint(1,data.cards)
+        data.rankHoleA2 = random.randint(1,data.cards)
+
+        data.suitHoleA1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+        data.suitHoleA2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+
+        data.handA = [(data.rankTurn, data.suitNamesTurn),   
+                       (data.rankRiver, data.suitNamesRiver),(data.rankHoleA1, data.suitHoleA1), (data.rankHoleA2, data.suitHoleA2), 
+                       (data.rankFlop1, data.suitNamesFlop1),
+                       (data.rankFlop2, data.suitNamesFlop2),
+                       (data.rankFlop3, data.suitNamesFlop3)]
+
+            
+        
+
+        data.rankHoleB1 = random.randint(1,data.cards)
+        data.rankHoleB2 = random.randint(1,data.cards)
+
+        data.suitHoleB1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+        data.suitHoleB2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+
+        data.handB = [(data.rankTurn, data.suitNamesTurn),   
+                       (data.rankRiver, data.suitNamesRiver),(data.rankHoleB1, data.suitHoleB1), (data.rankHoleB2, data.suitHoleB2), 
+                       (data.rankFlop1, data.suitNamesFlop1),
+                       (data.rankFlop2, data.suitNamesFlop2),
+                       (data.rankFlop3, data.suitNamesFlop3)]
+
+
+    
+    #make hand (P1)
+    if event.x in range(2*data.margin, 7*data.margin + 1) and event.y in range(data.height - 3*data.margin, data.height - 2*data.margin + 1):
+        data.makeHandA = not data.makeHandA
+        data.makeHandB = False
+
+
+
+    #make hand (P2)
+    if event.x in range(data.width - 7*data.margin, data.width - 2*data.margin + 1) and event.y in range(data.height - 3*data.margin, data.height - 2*data.margin + 1):
+        data.makeHandB = not data.makeHandB
+        data.makeHandA = False
+
+
+
+
+
+
+    #screen on hole cards
+    if event.x in range(2*data.margin, 7*data.margin + 1) and event.y in range(data.height - 8*data.margin, data.height - 7*data.margin + 1):      
+        data.hidden = not data.hidden
+
+
+
+    #player1's turn
+    if event.x in range(3*data.margin, 6*data.margin + 1) and event.y in range(data.height//2, data.margin + data.height//2 + 1):
+        
+        data.rankHoleA1
+        data.rankHoleA2
+        data.suitHoleA1
+        data.suitHoleA2
+
+
+        data.currPlayer1 = True
+        data.currPlayer2 = False
+
+        data.hidden = True
+
+        
+             
+    #player1 bets 1
+    if event.x in range(data.width - 7*data.margin, data.width - 17//4*data.margin + 1) and event.y in range(data.height - 8*data.margin, data.height - 7*data.margin + 1) and data.currPlayer1 == True:
+        
+        data.betAmnt = 1
+
+        if data.betAmnt >= data.prevBetAmntB and data.currPlayer1 == True and (data.betAmnt <= data.chips1B):
+        
+            data.chips1A -= data.betAmnt
+            data.chips2A += data.betAmnt
+
+            data.prevBetAmntA = data.betAmnt
+
+            data.currPlayer1 = False
+
+            if data.chips1A <= 0:
+                data.chips1A = 0
+                data.chips2A = 50
+
+
+    #player1 bets 5
+    if event.x in range(data.width - 7*data.margin, data.width - 17//4*data.margin + 1) and event.y in range(data.height - 7*data.margin, data.height - 6*data.margin+ 1) and data.currPlayer1 == True:
+        data.currPlayer1 = True
+        data.betAmnt = 5
+
+        if data.betAmnt >= data.prevBetAmntB and data.currPlayer1 == True and (data.betAmnt <= data.chips1B):
+        
+            data.chips1A -= data.betAmnt
+            data.chips2A += data.betAmnt
+
+            data.prevBetAmntA = data.betAmnt
+
+            data.currPlayer1 = False
+
+            if data.chips1A <= 0:
+                data.chips1A = 0
+                data.chips2A = 50
+
+
+
+    #player1 bets 10
+    if event.x in range(data.width - 7*data.margin, data.width - 17//4*data.margin + 1) and event.y in range(data.height - 6*data.margin, data.height - 5*data.margin + 1) and data.currPlayer1 == True:
+         
+        data.betAmnt = 10
+
+        if data.betAmnt >= data.prevBetAmntB and (data.betAmnt <= data.chips1B):
+        
+            data.chips1A -= data.betAmnt
+            data.chips2A += data.betAmnt
+
+            data.prevBetAmntA = data.betAmnt
+
+            data.currPlayer1 = False
+
+            if data.chips1A <= 0:
+                data.chips1A = 0
+                data.chips2A = 50
+
+
+
+    #player1 bets 15
+    if event.x in range(data.width - 7*data.margin, data.width - 17//4*data.margin + 1) and event.y in range(data.height - 5*data.margin, data.height - 4*data.margin + 1) and data.currPlayer1 == True:
+        
+        data.betAmnt = 15
+
+
+        if data.betAmnt >= data.prevBetAmntB and data.currPlayer1 == True and (data.betAmnt <= data.chips1B):
+        
+            data.chips1A -= data.betAmnt
+            data.chips2A += data.betAmnt
+
+            data.prevBetAmntA = data.betAmnt
+
+            data.currPlayer1 = False
+
+            if data.chips1A <= 0:
+                data.chips1A = 0
+                data.chips2A = 50
+
+
+
+    #player 1 fold
+    if event.x in range(data.width//3, 2*data.width//3 + 1) and event.y in range(data.height//2, data.margin + data.height//2 + 1) and data.currPlayer1 == True:
+        
+    
+        data.fold = True
+        data.roundEnd = True
+
+        data.currPlayer2 = False
+        data.currPlayer1 = False
+
+
+
+    #player2's turn
+    if event.x in range(data.width - 6*data.margin, data.width - 3*data.margin + 1) and event.y in range(data.height//2, data.margin + data.height//2 + 1):
+        
+
+        data.rankHoleB1
+        data.rankHoleB2
+        data.suitHoleB1
+        data.suitHoleB2
+
+        data.currPlayer2 = not data.currPlayer2
+        data.currPlayer1 = False
+
+
+        data.hidden = True
+
+
+
+    #player2 bets 1
+    if event.x in range(data.width - 9//2*data.margin, data.width - 2*data.margin + 1) and event.y in range(data.height - 8*data.margin, data.height - 7*data.margin + 1):
+                
+        data.betAmnt = 1
+
+        if data.betAmnt >= data.prevBetAmntA and data.currPlayer2 == True and (data.betAmnt <= data.chips1B):
+
+            data.roundCounter += 1
+            data.chips1B -= data.betAmnt
+            data.chips2B += data.betAmnt
+
+            data.prevBetAmntB = data.betAmnt
+
+            data.currPlayer2 = False
+
+            
+            if data.chips1B < 0:
+                data.chips1B = 0
+                data.chips2B = 50
+
+        
+    #player2 bets 5
+    if event.x in range(data.width - 9//2*data.margin, data.width - 2*data.margin + 1) and event.y in range(data.height - 7*data.margin, data.height - 6*data.margin+ 1):
+        
+
+        
+        data.betAmnt = 5
+
+        if data.betAmnt >= data.prevBetAmntA and data.currPlayer2 == True and (data.betAmnt <= data.chips1B):
+
+            
+            data.roundCounter += 1
+
+            data.chips1B -= data.betAmnt
+            data.chips2B += data.betAmnt
+
+            data.prevBetAmntB = data.betAmnt
+
+            data.currPlayer2 = False
+
+            
+
+            if data.chips1B < 0:
+                data.chips1B = 0
+                data.chips2B = 50
+
+        
+
+    #player2 bets 10
+    if event.x in range(data.width - 9//2*data.margin, data.width - 2*data.margin+ 1) and event.y in range(data.height - 6*data.margin, data.height - 5*data.margin + 1):
+        data.betAmnt = 10
+
+        if data.betAmnt >= data.prevBetAmntA and data.currPlayer2 == True and (data.betAmnt <= data.chips1B):
+
+            data.roundCounter += 1
+            data.chips1B -= data.betAmnt
+            data.chips2B += data.betAmnt
+
+            data.prevBetAmntB = data.betAmnt
+
+            data.currPlayer2 = False
+
+
+            if data.chips1B < 0:
+                data.chips1B = 0
+                data.chips2B = 50
+
+        
+
+
+    #player2 bets 15
+    if event.x in range(data.width - 9//2*data.margin, data.width - 2*data.margin + 1) and event.y in range(data.height - 5*data.margin, data.height - 4*data.margin + 1):
+        
+        
+        data.betAmnt = 15
+
+        if data.betAmnt >= data.prevBetAmntA and data.currPlayer2 == True and (data.betAmnt <= data.chips1B):
+            data.roundCounter += 1
+
+            data.chips1B -= data.betAmnt
+            data.chips2B += data.betAmnt
+
+            data.prevBetAmntB = data.betAmnt
+
+            data.currPlayer2 = False
+   
+
+
+            if data.chips1B < 0:
+                data.chips1B = 0
+                data.chips2B = 50
+
+    
+
+
+    #player 2 fold
+    if event.x in range(data.width//3, 2*data.width//3 + 1) and event.y in range(data.height//2, data.margin + data.height//2 + 1) and data.currPlayer2 == True:
+        data.fold = True
+        data.roundEnd = True
+
+        data.currPlayer2 = False
+        data.currPlayer1 = False
+
+
+        
+
+def drawNewRoundBt(canvas,data):
+    x1 = 2*data.margin
+    y1 = 3*data.margin
+    x2 = 7*data.margin
+    y2 = 4*data.margin
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "cyan")
+    canvas.create_text(x2-data.margin, y2- data.margin/2, text = "New round", anchor = E)
+
+
+
+def drawShowCardBt(canvas, data):
+    x1 = 2*data.margin
+    y1 = data.height - 8*data.margin
+    x2 = 30/4*data.margin
+    y2 = data.height - 7*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "orange")
+    canvas.create_text(x2, data.height - (15/2)*data.margin, text = "Show hole cards", anchor = E)
+
+ 
+
+
+def drawBet1A(canvas,data):
+    x1 = data.width - 7*data.margin
+    y1 = data.height - 8*data.margin
+    x2 = data.width - 9/2*data.margin
+    y2 = data.height - 7*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "white")
+    canvas.create_text(data.width- 23/4*data.margin, data.height- (15/2)* data.margin, text = "Bet 1")
+    
+
+
+def drawBet5A(canvas, data):
+    x1 = data.width - 7*data.margin
+    y1 = data.height - 7*data.margin
+    x2 = data.width - 9/2*data.margin
+    y2 = data.height - 6*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "red")
+    canvas.create_text(data.width- 23/4*data.margin, data.height- (13/2)* data.margin, text = "Bet 5")
+
+
+def drawBet10A(canvas, data):
+    x1 = data.width - 7*data.margin
+    y1 = data.height - 6*data.margin
+    x2 = data.width - 9/2*data.margin
+    y2 = data.height - 5*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "blue")
+    canvas.create_text(data.width- 23/4*data.margin, data.height- (11/2)* data.margin, text = "Bet 10")
+
+
+def drawBet15A(canvas, data):
+    x1 = data.width - 7*data.margin
+    y1 = data.height - 5*data.margin
+    x2 = data.width - 9/2*data.margin
+    y2 = data.height - 4*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "light green")
+    canvas.create_text(data.width- 23/4*data.margin, data.height- (9/2)* data.margin, text = "Bet 15")
+
+
+
+
+def drawBet1B(canvas,data):
+    x1 = data.width - 17/4*data.margin
+    y1 = data.height - 8*data.margin
+    x2 = data.width - 2*data.margin
+    y2 = data.height - 7*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "white")
+    canvas.create_text(data.width- 3*data.margin, data.height- (15/2)* data.margin, text = "Bet 1")
+
+
+def drawBet5B(canvas, data):
+    x1 = data.width - 17/4*data.margin
+    y1 = data.height - 7*data.margin
+    x2 = data.width - 2*data.margin
+    y2 = data.height - 6*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "red")
+    canvas.create_text(data.width- 3*data.margin, data.height- (13/2)* data.margin, text = "Bet 5")
+
+
+def drawBet10B(canvas, data):
+    x1 = data.width - 17/4*data.margin
+    y1 = data.height - 6*data.margin
+    x2 = data.width - 2*data.margin
+    y2 = data.height - 5*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "blue")
+    canvas.create_text(data.width- 3*data.margin, data.height- (11/2)* data.margin, text = "Bet 10")
+
+
+def drawBet15B(canvas, data):
+    x1 = data.width - 17/4*data.margin
+    y1 = data.height - 5*data.margin
+    x2 = data.width - 2*data.margin
+    y2 = data.height - 4*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "light green")
+    canvas.create_text(data.width- 3*data.margin, data.height- (9/2)* data.margin, text = "Bet 15")
+
+
+
+def drawHoleA(canvas, data):
+
+    (data.rankHoleA1 != data.rankHoleA2 and
+        data.rankHoleA1 != data.rankFlop1 and
+        data.rankHoleA1 != data.rankFlop2 and
+        data.rankHoleA1 != data.rankFlop3 and
+        data.rankHoleA2 != data.rankFlop1 and
+        data.rankHoleA2 != data.rankFlop2 and
+        data.rankHoleA2 != data.rankFlop3)
+
+    hole1 = getPlayingCardImage(data, data.rankHoleA1, data.suitHoleA1)
+    hole2 = getPlayingCardImage(data, data.rankHoleA2, data.suitHoleA2)
+
+
+    canvas.create_image(data.width/2 - 2*data.margin, data.height - 5*data.margin,  image = hole1)
+    canvas.create_image(data.width/2 + 2*data.margin, data.height - 5*data.margin,  image = hole2)
+
+
+def drawHoleB(canvas, data):
+
+    (data.rankHoleB1 != data.rankHoleA1 and
+        data.rankHoleB1 != data.rankHoleA2 and
+        data.rankHoleB2 != data.rankHoleA1 and
+        data.rankHoleB2 != data.rankHoleA2 and
+        data.suitHoleB1 != data.suitHoleA1 and
+        data.suitHoleB1 != data.suitHoleA2 and
+        data.suitHoleB2 != data.suitHoleA1 and
+        data.suitHoleB2 != data.suitHoleA2)
+
+    hole1 = getPlayingCardImage(data, data.rankHoleB1, data.suitHoleB1)
+    hole2 = getPlayingCardImage(data, data.rankHoleB2, data.suitHoleB2)
+
+
+    canvas.create_image(data.width/2 - 2*data.margin, data.height - 5*data.margin,  image = hole1)
+    canvas.create_image(data.width/2 + 2*data.margin, data.height - 5*data.margin,  image = hole2)
+
+
+def drawFlopCards(canvas, data):    
+    
+
+    flop1 = getPlayingCardImage(data, data.rankFlop1, data.suitNamesFlop1)
+    flop2 = getPlayingCardImage(data, data.rankFlop2, data.suitNamesFlop2)
+    flop3 = getPlayingCardImage(data, data.rankFlop3, data.suitNamesFlop3)
+
+    canvas.create_image(data.width/3, data.height/3,  image = flop1)
+    canvas.create_image(data.width/2, data.height/3,  image = flop2)
+    canvas.create_image(2*data.width/3, data.height/3,  image = flop3)
+    
+
+def drawTurnCard(canvas, data):
+
+    (data.rankTurn != data.rankFlop1 and 
+        data.rankTurn != data.rankFlop2 and 
+        data.rankTurn != data.rankFlop3 and 
+        data.suitNamesTurn != data.suitNamesFlop1 and 
+        data.suitNamesTurn != data.suitNamesFlop2 and 
+        data.suitNamesTurn != data.suitNamesFlop3 and
+        data.suitNamesTurn != data.suitHoleA1 and
+        data.suitNamesTurn != data.suitHoleA2 and
+        data.suitNamesTurn != data.suitHoleB1 and
+        data.suitNamesTurn != data.suitHoleB2)
+
+    turn = getPlayingCardImage(data, data.rankTurn, data.suitNamesTurn)
+    canvas.create_image(data.width/6, data.height/3,  image = turn)
+
+        
+def drawRiverCard(canvas, data):
+
+    (data.rankRiver != data.rankFlop1 and 
+        data.rankRiver!= data.rankFlop2 and 
+        data.rankRiver != data.rankFlop3 and
+        data.rankRiver != data.rankHoleA1 and
+        data.rankRiver != data.rankHoleA2 and
+        data.rankRiver != data.rankHoleB1 and
+        data.rankRiver != data.rankHoleB2 and
+        data.rankRiver != data.rankTurn and
+        data.suitNamesRiver != data.suitNamesFlop1 and 
+        data.suitNamesRiver != data.suitNamesFlop2 and 
+        data.suitNamesRiver != data.suitNamesFlop3 and
+        data.suitNamesRiver != data.suitHoleA1 and
+        data.suitNamesRiver != data.suitHoleA2 and
+        data.suitNamesRiver != data.suitHoleB1 and
+        data.suitNamesRiver != data.suitHoleB2)
+
+    river = getPlayingCardImage(data, data.rankRiver, data.suitNamesRiver)
+    canvas.create_image(5*data.width/6, data.height/3,  image = river)
+
+    
+
+def drawFoldBt(canvas, data):
+
+    x1 = data.width/3
+    y1 = data.height/2
+    x2 = 2*data.width/3
+    y2 = data.margin + data.height/2
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "pink")
+    canvas.create_text(data.width/2, data.margin/2 + data.height/2, text = "Fold")
+
+
+
+def drawPlayer1Bt(canvas, data):
+
+    if data.currPlayer1 == True:
+        canvas.create_rectangle(3*data.margin, data.height/2, 6*data.margin, data.margin + data.height/2, fill = "light green")
+        canvas.create_text(9/2*data.margin, data.margin/2 + data.height/2, text = "Player 1")
+    else:
+        canvas.create_rectangle(3*data.margin, data.height/2, 6*data.margin, data.margin + data.height/2, fill = "gray")
+        canvas.create_text(9/2*data.margin, data.margin/2 + data.height/2, text = "Player 1")
+
+
+def drawPlayer2Bt(canvas, data):
+
+    if data.currPlayer2 == True:
+        canvas.create_rectangle(data.width - 6*data.margin, data.height/2, data.width - 3*data.margin, data.margin + data.height/2, fill = "light green")
+        canvas.create_text(data.width - 9/2*data.margin, data.margin/2 + data.height/2, text = "Player 2")
+    else:
+        canvas.create_rectangle(data.width - 6*data.margin, data.height/2, data.width - 3*data.margin, data.margin + data.height/2, fill = "gray")
+        canvas.create_text(data.width - 9/2*data.margin, data.margin/2 + data.height/2, text = "Player 2")
+
+
+def drawMakeHandABt(canvas, data):
+
+    x1 = 2*data.margin
+    y1 = data.height - 3*data.margin
+    x2 = 7*data.margin
+    y2 = data.height - 2*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "blue")
+    canvas.create_text(9/2*data.margin, data.height - 5/2*data.margin, text = "Make HandA", fill = "white")
+
+
+
+def drawMakeHandBBt(canvas, data):
+
+    x1 = data.width - 7*data.margin
+    y1 = data.height - 3*data.margin
+    x2 = data.width - 2*data.margin
+    y2 = data.height - 2*data.margin
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill = "blue")
+    canvas.create_text(data.width - 9/2*data.margin, data.height - 5/2*data.margin, text = "Make HandB", fill = "white")
+
+
+
+def drawStart(canvas, data):
+
+    canvas.create_rectangle(data.width/3, data.height/3 + 2*data.margin, 2*data.width/3, 5*data.height/12 + 2*data.margin, fill = "gold")
+    canvas.create_text(data.width/2, 11*data.height/24, text = "Play", font = "Times 16")
+
+def drawHelp(canvas, data):
+
+    canvas.create_rectangle(data.width/3, data.margin + 5*data.height/12 + 2*data.margin, 2*data.width/3, data.margin + data.height/2 + 2*data.margin, fill = "blue")
+    canvas.create_text(data.width/2, 11*data.height/24 + data.height/8, text = "Help", font = "Times 16")
+
+
+
+def drawMenu(canvas, data):
+
+
+    data.rankFlop1 = random.randint(1,data.cards)
+    data.rankFlop2 = random.randint(1,data.cards)
+
+
+    data.suitNamesFlop1 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    data.suitNamesFlop2 = random.choice(["Clubs", "Diamonds", "Hearts", "Spades"])
+    
+
+    flop1 = getPlayingCardImage(data, data.rankFlop1, data.suitNamesFlop1)
+    flop2 = getPlayingCardImage(data, data.rankFlop2, data.suitNamesFlop2)
+    
+
+    canvas.create_rectangle(0,0, data.width, data.height, fill = "pink")
+    canvas.create_text(data.width/2, data.height/4, text = "Texas Hold 'Em", fill = random.choice(["black", "green", "blue", "red", "white"]), font = "Times 28")
+
+
+    canvas.create_image(2*data.margin, data.height/5,  image = flop1)
+    canvas.create_image(data.width - 2*data.margin, data.height/5,  image = flop2)
+    
+
+def drawHelpBackBt(canvas, data):
+
+    canvas.create_rectangle(2*data.margin, 2*data.margin, 4*data.margin, 3*data.margin, fill = "light blue")
+    canvas.create_text(3*data.margin, 5*data.margin/2, text = "Back", font = "Times 16")
+
+
+def drawHelpScreen(canvas, data):
+
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "pink")
+    canvas.create_text(data.width/2, data.height/4, text = "Instructions", font = "Times 20", fill = "green")
+    canvas.create_text(2*data.width/5 + 3*data.margin/4, data.margin + data.height/2, text = 
+        """
+        The game starts with three cards in the middle, known as the "flop". 
+        Each player has two of their own cards (holes) which they keep secret. 
+        Based on the holes and the flop, each player bets some chips until everyone has bet. 
+        If someone does not, or cannot bet, they can fold, which means they will not be 
+        getting any money for this current round. 
+        After everyone has bet once, a new flop card is revealed, known as the "turn". 
+        After the second bet, the final card ("river"), is revealed.
+        At this point, the players show their card hands, which consist of 
+        their two hole cards and three flop cards. 
+        Whoever has the better hand wins the round, and 
+        collects the other player's chips from their pool.
+        The game continues until one or both players have no chips in their original stash. 
+        The player with the highest chip value wins the game.
+
+        """, font = "Times 13")
+
+
+
+
+def redrawAll(canvas, data):
+
+
+    if data.menu == True:
+        data.startGame = False
+
+        drawMenu(canvas, data)
+        drawStart(canvas, data)
+        drawHelp(canvas, data)
+
+        if data.help == True:
+
+            drawHelpScreen(canvas,data)
+            drawHelpBackBt(canvas, data)
+
+            if data.helpBackBt == True:
+                drawMenu(canvas, data)
+
+
+    if data.startGame == True:
+        
+        data.menu = False
+        
+   
+        canvas.create_rectangle(data.margin, data.margin, data.width-data.margin, data.height-data.margin, fill = "tan")
+        canvas.create_rectangle(2*data.margin, 2*data.margin, data.width-2*data.margin, data.height-2*data.margin, fill = "green")
+    
+
+        drawNewRoundBt(canvas, data)
+        drawShowCardBt(canvas, data)
+        drawFoldBt(canvas, data)
+
+        drawBet1A(canvas, data)
+        drawBet5A(canvas, data)
+        drawBet10A(canvas, data)
+        drawBet15A(canvas, data)
+
+        drawBet1B(canvas, data)
+        drawBet5B(canvas, data)
+        drawBet10B(canvas, data)
+        drawBet15B(canvas, data)
+
+        drawMakeHandABt(canvas, data)
+        drawMakeHandBBt(canvas, data)
+
+
+        drawPlayer1Bt(canvas, data)
+        drawPlayer2Bt(canvas, data)
+
+        drawFlopCards(canvas, data)
+
+
+        if data.showTurn == True:
+            drawTurnCard(canvas, data)
+
+        if data.showRiver == True:
+            drawRiverCard(canvas, data)
+
+
+        if data.currPlayer1 == True:
+            drawHoleA(canvas, data)
+
+
+        elif data.currPlayer2 == True:
+            drawHoleB(canvas, data)
+
+
+        canvas.create_text(data.width/2- 2*data.margin, 3*data.margin, text = str(data.chips2A), fill = "white")
+        canvas.create_text(data.width/2+ 2*data.margin, 3*data.margin, text = str(data.chips2B), fill = "white")
+
+        canvas.create_text(data.width - 23/4*data.margin, data.height -17/2*data.margin, text = "P1", fill = "white")
+        canvas.create_text(data.width - 3*data.margin, data.height -17/2*data.margin, text = "P2", fill = "white")
+
+        
+
+        player1ScoreBt = canvas.create_text(4*data.margin, 2*data.margin+data.height/2, text = str(data.chips1A), fill = "white")
+        player2ScoreBt = canvas.create_text(data.width - 4*data.margin, 2*data.margin+data.height/2, text = str(data.chips1B), fill = "white")
+
+        
+        
+        if data.newRound == True:
+            drawFlopCards(canvas, data)
+
+            if data.currPlayer1 == True:
+                drawHoleA(canvas, data)
+
+            if data.currPlayer2 == True:
+                drawHoleB(canvas,data)
+
+
+        screen = canvas.create_rectangle(data.width/2 - 4*data.margin, data.height - 8*data.margin, data.width/2 + 4*data.margin, data.height- (5/2)*data.margin, fill = "blue")
+
+
+        if data.hidden == True:
+            screen
+        else:
+            canvas.delete(screen)
+
+
+        if data.makeHandA == True:
+
+            handALst = bestInitHand(data, data.handA)
+
+            for i in range(len(handALst)):
+
+                margin = data.width/6
+
+                img = getPlayingCardImage(data, handALst[i][0], handALst[i][1])
+                canvas.create_image((i+1)*margin, data.height/3, image = img)
+                    
+
+
+        if data.makeHandB == True:
+            
+            handBLst = bestInitHand(data, data.handB)
+            for i in range(len(handBLst)):
+
+                margin = data.width/6
+
+                img = getPlayingCardImage(data, handBLst[i][0], handBLst[i][1])
+                canvas.create_image((i+1)*margin, data.height/3, image = img)
+
+   
+
+        roundIndic = canvas.create_rectangle(data.width/2 - 4*data.margin, data.height - 8*data.margin, data.width/2 + 4*data.margin, data.height- (5/2)*data.margin, fill = "turquoise")
+        roundTxt = canvas.create_text(data.width/2, 4*data.height/5, text = "End of Round!", fill = "black")
+     
+
+        if data.roundEnd == True:
+            roundIndic
+            roundTxt
+        if data.roundEnd == False:
+            canvas.delete(roundIndic)
+            canvas.delete(roundTxt)
+
+
+        if data.playerAWin == True:
+            canvas.create_rectangle(0, data.height/3, data.width, data.height/2, fill = "red")
+            canvas.create_text(data.width/2, 2*data.height/5, text = "Player 1 Wins!", fill = "white")
+
+        if data.playerBWin == True:
+            canvas.create_rectangle(0, data.height/3, data.width, data.height/2, fill = "red")
+            canvas.create_text(data.width/2, 2*data.height/5, text = "Player 2 Wins!", fill = "white")
+
+
+
+def keyPressed(event, data):
+    pass
+
+def timerFired(data):
+    pass
+
+
+#run function starter code (taken from 112 course website)
+def run(width=300, height=300):
+    def redrawAllWrapper(canvas, data):
+        canvas.delete(ALL)
+        canvas.create_rectangle(0, 0, data.width, data.height,
+                                fill='white', width=0)
+        redrawAll(canvas, data)
+        canvas.update()    
+
+    def mousePressedWrapper(event, canvas, data):
+        mousePressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    def keyPressedWrapper(event, canvas, data):
+        keyPressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    def timerFiredWrapper(canvas, data):
+        timerFired(data)
+        redrawAllWrapper(canvas, data)
+        # pause, then call timerFired again
+        canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
+    # Set up data and call init
+    class Struct(object): pass
+    data = Struct()
+    data.width = width
+    data.height = height
+    data.timerDelay = 250 # milliseconds
+    root = Tk()
+    root.resizable(width=False, height=False) # prevents resizing window
+    init(data)
+    # create the root and the canvas
+    canvas = Canvas(root, width=data.width, height=data.height)
+    canvas.configure(bd=0, highlightthickness=0)
+    canvas.pack()
+    # set up events
+    root.bind("<Button-1>", lambda event:
+                            mousePressedWrapper(event, canvas, data))
+    root.bind("<Key>", lambda event:
+                            keyPressedWrapper(event, canvas, data))
+    timerFiredWrapper(canvas, data)
+    # and launch the app
+    root.mainloop()  # blocks until window is closed
+    print("bye!")
+
